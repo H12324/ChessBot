@@ -1,7 +1,7 @@
 import pygame
 #from chess import Board as board
 
-def loadImages():
+def loadImages(squareSize):
     pieces = ["wB", "bB","wN", "bN","wR", "bR","wP", "bP","wK", "bK","wQ", "bQ"]
     images = []
     for piece in pieces:
@@ -11,19 +11,21 @@ def loadImages():
     return images
 
 
-def drawBoard():
+def drawBoard(squareSize, screen):
     #Fill board
+    whiteSquare = 0xEEEED2
+    blackSquare = 0x769656
     for i in range(8):
         for j in range(8):
             #Lol the things i do to avoid an if statement
-            pygame.draw.rect(screen, (whiteSquare-blackSquare) * ((i + j + 1) % 2) + blackSquare, pygame.Rect(squareSize *  i + offsetX , squareSize * j + offsetY, squareSize, squareSize))
+            pygame.draw.rect(screen, (whiteSquare-blackSquare) * ((i + j + 1) % 2) + blackSquare, pygame.Rect(squareSize *  i , squareSize * j, squareSize, squareSize))
             
-def drawPieces(screen, images, board):
+def drawPieces(screen, images, board, squareSize):
     for i in range(8):
         for j in range(8):
             #Lol the things i do to avoid an if statement
             if board[i + j*8] > -1:
-                screen.blit(images[board[i + j*8]], pygame.Rect(squareSize *  i + offsetX , squareSize * j + offsetY, squareSize, squareSize))
+                screen.blit(images[board[i + j*8]], pygame.Rect(squareSize *  i , squareSize * j, squareSize, squareSize))
 
 #Turns a FEN string into a board
 def fen_to_board(fenString):
@@ -76,45 +78,62 @@ def fen_to_board(fenString):
                 board.append(-1)
 
     return board
+
+#Input/Output
+def getPieceFromMouseClick():
+    pass
+
+def screenPosToBoard(squareSize, mousePos):
+    #Function takes mousePosition and returns the index on the board it corresponds to
+    return(mousePos[0] // squareSize, mousePos[1] // squareSize)
     
+
+
+
 #Main Stuff
-#Initialize Window Details
-(width, height) = (512, 512) #Self-explanatory
-background_colour = (24,25,26)
-#background_colour = (36,0x19,0x26)
-screen = pygame.display.set_mode((width, height))
-screen.fill(background_colour)
-pygame.display.set_caption('Chess')
+def main():
+    #Initialize Window Details
+    (width, height) = (800, 800) #Self-explanatory
+    background_colour = (24,25,26)
+    #background_colour = (36,0x19,0x26)
+    screen = pygame.display.set_mode((width, height))
+    screen.fill(background_colour)
+    pygame.display.set_caption('Chess')
 
-#Tweak these depending on aesthetic
-offsetX = width / 64 
-offsetY = height / 64 
+    #Tweak these depending on aesthetic
+    offsetX = width / 64 
+    offsetY = height / 64 
 
-offsetX = 0
-offsetY = 0
+    offsetX = 0
+    offsetY = 0
 
-whiteSquare = 0xEEEED2
-blackSquare = 0x769656
-squareSize = width // 8
+    whiteSquare = 0xEEEED2
+    blackSquare = 0x769656
+    squareSize = width // 8
 
-#Load images
-images = loadImages()
-drawBoard()
-board = fen_to_board("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
-drawPieces(screen, images, board)
-
-
-
-pygame.display.flip() #Updates display, i think 
+    #Load images
+    images = loadImages(squareSize) #NOTE: edit the function later so that the square size doesn't need to be a parameter
+    drawBoard(squareSize, screen)
+    board = fen_to_board("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+    drawPieces(screen, images, board, squareSize)
 
 
-#Run the window (Game Loop)
-running = True
-while running:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
+
+    pygame.display.flip() #Updates display, i think 
 
 
-pygame.quit()
+    #Run the window (Game Loop)
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                goober = pygame.mouse.get_pos()
 
+
+                print("I'm a goofy goober",screenPosToBoard(squareSize, goober) )
+
+    pygame.quit()
+
+main()

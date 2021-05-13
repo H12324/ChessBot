@@ -66,3 +66,14 @@ class Board:
 
 
 #print(fen_to_board("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"))
+
+class Piece:
+    def __init__(self, rank, position):
+        self.type = rank
+        self.position = position
+        self.image = 0
+
+
+
+    
+
