@@ -1,18 +1,13 @@
-# the compiler: gcc for C program, define as g++ for C++
-  CC = gcc
- 
-  # compiler flags:
-  #  -g     - this flag adds debugging information to the executable file
-  #  -Wall  - this flag is used to turn on most compiler warnings
-  CFLAGS  = -g -Wall
- 
-  # The build target 
-  TARGET = main
- 
-  all: $(TARGET)
- 
-  $(TARGET): $(TARGET).c
-              $(CC) $(CFLAGS) -o $(TARGET) $(TARGET).c
- 
-  clean:
-              $(RM) $(TARGET)
+
+
+chess: main.o chess.o
+	g++ main.o chess.o -o chess
+
+main.o: main.cpp
+	g++ -c main.cpp
+
+chess.o: chess.cpp chess.h
+	g++ -c chess.cpp
+
+clean: 
+	rm *.o chess
