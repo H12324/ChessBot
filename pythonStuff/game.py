@@ -2,7 +2,8 @@ import pygame
 #from chess import Board as board
 
 def loadImages(squareSize):
-    pieces = ["wB", "bB","wN", "bN","wR", "bR","wP", "bP","wK", "bK","wQ", "bQ"]
+    #pieces = ["wB", "bB", "wN", "bN", "wR", "bR", "wP", "bP", "wK", "bK", "wQ", "bQ"]
+    pieces = ["bP", "bN", "bR", "bB", "bQ", "bK", "wP", "wN", "wR", "wB", "wQ", "wK"]
     images = []
     for piece in pieces:
         images.append(pygame.image.load('assets/' + piece + '.png'))
