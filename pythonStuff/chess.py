@@ -3,7 +3,7 @@
 class Board:
     def __init__(self, fenString):
         self.board = fen_to_board(fenString)
-
+    
     def getBoardState(self):
         return self.board
 
@@ -13,6 +13,7 @@ class Board:
 
 
     #Turns a FEN string into a board
+    #Currently a 8x8 representation, might alter to 10x12 to make easier
     def fen_to_board(fenString):
         board = []
         p = 1
@@ -75,19 +76,52 @@ class Board:
     def getAllValidMoves(colour):
         pass
 
-    def getPawnMove(colour, position):
+    def getAllPawnMoves(colour, position):
        #Should have something to account for pawn being able to jump 2 during the first round
-       
+       pass
 
 
 #print(fen_to_board("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"))
 
-class Piece:
-    def __init__(self, rank, position):
-        self.type = rank
-        self.position = position
-        self.image = 0
+class Square:
+    #Let black = 1; white = -1 and empty square has colour of 0
+    def __init__(self, piece, colour):
+        self.piece = piece
+        #self.position = position
+        self.colour = colour
+        #self.image = 0
+    
 
+    #Pawns can move +-8 positions on board when unnocupied
+    #Pawns can capture enemy pieces that are +- 7 or 9
+    #INSERT EN POSSANT RULES
+    def getPawnMoves(board, position, color):
+        possibleMoves = []
+        #Normal move 1 square, technically don't have to check if in bounds because it will transform anyways
+        if (board[8*color + position].colour == 0):
+            possibleMoves.append(8*color + position)
 
+            #Possibility to move 2 squares when at starting position
+            if (position >= 8 and position < 16) or (position < 56 and position >= 48) and (position + 16*colour < 64 and position + 16*colour >= 0):
+                if (board[16*color + position].colour == 0):
+                     possibleMoves.append(16*color + position)
+        #Capture enemy piece (West) aka shift 7 
+        if (position % 8 != 0 and board[7*colour + position].colour == -color): #eh I'll fix the segfault bug later after I fully decide how board representation will work
+            possibleMoves.append(7*color + position)
+        #Capture enemy piece (East) aka shift 9
+        if (position + 1 % 8 != 0 and board[9*colour + position].colour == -color): #eh I'll fix the segfault bug later after I fully decide how board representation will work
+            possibleMoves.append(9*color + position)
+
+        #Insert en possant code
+            
+
+        return possibleMoves
+
+    def getTypeOfMoves(board, position):
+       if board[position] == 1:
+            getPawnMoves(board, position, "black")
+        elif board[position] == 9:
+            getPawnMoves(board, position, "white")
+                                                  
     
 

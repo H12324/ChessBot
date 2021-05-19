@@ -20,3 +20,6 @@ Board::Board(){
     pieceBB[bQ] =    0x1000000000000000;
     pieceBB[bK] =    0x0800000000000000;
 }
+
+//Ideas for generating moves
+//- 
