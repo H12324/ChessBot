@@ -59,7 +59,7 @@ class Board:
              
         self.board = convertTo10x12(board) #lol i'm a big clown, spent an hour debugging looking turns out it was one extra indent...
 
-            
+    #Maybe create a movelist / tracker and implement undo move feature            
     def getBoardState(self):
         return self.board
 
@@ -72,7 +72,7 @@ class Board:
         self.board[place1] = 0
         return board
     
-    #MOVE GENERATION FUNCTIONS
+    #MOVE GENERATION FUNCTIONS (maybe move to a seperate class)
     #------------------------------------------------------------------------#
     #Get moves functions
     def getAllValidMoves(colour):
@@ -86,9 +86,9 @@ class Board:
     #Pawns can move +-8 positions on board when unnocupied
     #Pawns can capture enemy pieces that are +- 7 or 9
     #INSERT EN POSSANT RULES
-    def getPawnMoves(self, board, position, color):
+    def getPawnMoves(self, board, position):
         possibleMoves = []
-        
+        color = board[position].colour
         #Variable definitions to make code more readable
         empty = 0
         move1 = 10*color + position  #8*color + position  (8x8 Versions)
@@ -111,13 +111,52 @@ class Board:
             possibleMoves.append(moveE)
 
         #Insert en possant code
-            
-
+        
         return possibleMoves
 
-    def getKnightMoves(self, board, position, color):
-        pass
+    def getKnightMoves(self, board, position):
+        possibleMoves = []
+        invalid = -2
+        color = board[position].colour
+        movements = [12, 8, 21, 19, -12, -8, -21, -19]
+        for move in movements:
+            trg = move + position   #Target square
+            if (board[trg].colour != invalid and board[trg].colour != color):
+                possibleMoves.append(trg)
+        return possibleMoves
 
+    #Generate moves, for Queen (true, true), Rook (true, false), and Bishop (false, true)
+    def getSlidingMoves(self, board, position, vert = True, diag = True):
+        possibleMoves = []
+        movements = []
+        invalid = -2
+        color = board[position].colour
+        if (vert):
+            movements.extend([1, -1 , 10, -10]) #East, West, South, North assuming piece is black
+        if diag:
+            movements.extend([11, 9, -11, -9])  #Diagonals
+        for move in movements:
+            trg = move + position
+            while board[trg].colour == 0:
+                possibleMoves.append(trg)
+                trg += move
+            if board[trg].colour == -color:
+                possibleMoves.append(trg)
+        return possibleMoves
+    
+    #Still need to add checkmate conditions but should be fine as a starter
+    def getKingMoves(self, board, position):
+        possibleMoves = []
+        invalid = -2
+        color = board[position].colour
+        movements = [11, 10, 9, 1, -1,  -9, -10, -11]
+        for move in movements:
+            trg = move + position   #Target square
+            if (board[trg].colour != invalid and board[trg].colour != color):
+                possibleMoves.append(trg)
+        return possibleMoves
+
+                  
 #Helper function that converts the 8x8 array to a 10x12 array
 #Because I'm too lazy to edit the fenstring code
 def convertTo10x12(board):
@@ -127,6 +166,7 @@ def convertTo10x12(board):
         for col in range(1, 9):
             newBoard[row*10 + col] =  board[(row-2)*8+(col-1)]         
     return newBoard
+
 class Square:
     #Let black = 1; white = -1 and empty square has colour of 0
     def __init__(self, piece, colour):
@@ -136,15 +176,15 @@ class Square:
         #self.image = 0
     
                                                   
- 
-fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-chessB = Board()
-pawnMv = chessB.getPawnMoves(chessB.board, 83, chessB.board[83].colour)
-"""for i in range(12):
-    word = ""
-    for j in range(10):
-        word += str(chessB.board[i*10 + j].colour)
-    print(word)"""
+#Some code for testing functions
+#fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+#chessB = Board()
+#pawnMv = chessB.getSlidingMoves(chessB.board, 31, vert = False)
+#"""for i in range(12):
+#    word = ""
+#    for j in range(10):
+#        word += str(chessB.board[i*10 + j].colour)
+#    print(word)"""
 
-print(pawnMv)
+#print(pawnMv)
 
