@@ -5,12 +5,13 @@ Now its more like 2 Chess engines being developed simultaneously in both python 
 
 **Current Progress**
 
-*Python:*
-    Base Game:
-    * Board Representation (Mailbox) ✓
-    * Move generation ✓
-    * Integrating with GUI
-    * Checkmate/Win conditions
-    * Advanced Rules
-*C++*
-	- Board Representation (Bitboard)
+## Python:
+Base Game:
+- Board Representation (Mailbox) ✓
+- Move generation ✓
+- Integrating with GUI
+- Checkmate/Win conditions
+- Advanced Rules
+
+## C++:
+- Board Representation (Bitboard)

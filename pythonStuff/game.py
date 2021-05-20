@@ -1,4 +1,5 @@
-import pygame
+import pygame as pg
+import chess
 #from chess import Board as board
 
 def loadImages(squareSize):
@@ -6,9 +7,9 @@ def loadImages(squareSize):
     pieces = ["bP", "bN", "bR", "bB", "bQ", "bK", "wP", "wN", "wR", "wB", "wQ", "wK"]
     images = []
     for piece in pieces:
-        images.append(pygame.image.load('assets/' + piece + '.png'))
+        images.append(pg.image.load('assets/' + piece + '.png'))
     for piece in range(len(images)):
-        images[piece] = pygame.transform.scale(images[piece], (squareSize,squareSize))
+        images[piece] = pg.transform.scale(images[piece], (squareSize,squareSize))
     return images
 
 
@@ -19,79 +20,22 @@ def drawBoard(squareSize, screen):
     for i in range(8):
         for j in range(8):
             #Lol the things i do to avoid an if statement
-            pygame.draw.rect(screen, (whiteSquare-blackSquare) * ((i + j + 1) % 2) + blackSquare, pygame.Rect(squareSize *  i , squareSize * j, squareSize, squareSize))
+            pg.draw.rect(screen, (whiteSquare-blackSquare) * ((i + j + 1) % 2) + blackSquare, pg.Rect(squareSize *  i , squareSize * j, squareSize, squareSize))
             
 def drawPieces(screen, images, board, squareSize):
+    index = 0 #Actual index of the board in the 10x12
     for i in range(8):
         for j in range(8):
-            #Lol the things i do to avoid an if statement
-            if board[i + j*8] > -1:
-                screen.blit(images[board[i + j*8]], pygame.Rect(squareSize *  i , squareSize * j, squareSize, squareSize))
-
-#Turns a FEN string into a board
-def fen_to_board(fenString):
-    board = []
-    p = 7
-    P = 6
-    n = 3
-    r = 5
-    b = 1
-    q = 11
-    k = 9
-    N = 2
-    R = 4
-    B = 0
-    Q = 10
-    K = 8
-
-    for letter in fenString:
-        #12 pieces could use better approach but lazy
-        if letter == "p":
-            board.append(p)
-        elif letter == "P":
-            board.append(P)
-        elif letter == "b":
-            board.append(b)
-        elif letter == "B":
-            board.append(B)
-        elif letter == "n":
-            board.append(n)
-        elif letter == "N":
-            board.append(N)
-        elif letter == "Q":
-            board.append(Q)
-        elif letter == "q":
-            board.append(q)
-        elif letter == "r":
-            board.append(r)
-        elif letter == "R":
-            board.append(R)
-        elif letter == "k":
-            board.append(k)
-        elif letter == "K":
-            board.append(K)
-        #Exit for now here because I don't want to implement/fix
-        elif letter == " ":
-            break
-        #Spaces
-        elif letter != "/":
-            for i in range(int(letter)):
-                board.append(-1)
-
-    return board
+            index = (i + 2) *10 + (j + 1) 
+            if board[index].colour !=  0:
+                screen.blit(images[board[index].piece], pg.Rect(squareSize *  j , squareSize * i, squareSize, squareSize))
 
 #Input/Output
-def getPieceFromMouseClick():
-    pass
 
 def screenPosToBoard(squareSize, mousePos):
     #Function takes mousePosition and returns the index on the board it corresponds to
     return (mousePos[0] // squareSize) + 8*(mousePos[1] // squareSize) #x + y*8 = position
     
-def generateMoveList(board):
-    for piece in board:
-        pass        
-
 
 #Main Stuff
 def main():
@@ -99,9 +43,9 @@ def main():
     (width, height) = (800, 800) #Self-explanatory
     background_colour = (24,25,26)
     #background_colour = (36,0x19,0x26)
-    screen = pygame.display.set_mode((width, height))
+    screen = pg.display.set_mode((width, height))
     screen.fill(background_colour)
-    pygame.display.set_caption('Chess')
+    pg.display.set_caption('Chess')
 
     #Tweak these depending on aesthetic
     offsetX = width / 64 
@@ -117,28 +61,29 @@ def main():
     #Load images
     images = loadImages(squareSize) #NOTE: edit the function later so that the square size doesn't need to be a parameter
     drawBoard(squareSize, screen)
-    board = fen_to_board("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+    cBoard = chess.Board() 
+    board = cBoard.board
     drawPieces(screen, images, board, squareSize)
 
     
 
-    pygame.display.flip() #Updates display, i think 
+    pg.display.flip() #Updates display, i think 
 
 
     #Run the window (Game Loop)
     running = True
     while running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT: #Quit while you're ahead champ
+        for event in pg.event.get():
+            if event.type == pg.QUIT: #Quit while you're ahead champ
                 running = False
-            elif event.type == pygame.MOUSEBUTTONDOWN: #Things related to moving the pieces with the mouse
+            elif event.type == pg.MOUSEBUTTONDOWN: #Things related to moving the pieces with the mouse
                 #I want drag and drop but I'm too lazy to work for it
-                goober = pygame.mouse.get_pos()
+                goober = pg.mouse.get_pos()
                 boardPos = screenPosToBoard(squareSize, goober)
 
         
-        pygame.display.flip()
-    pygame.quit()
+        pg.display.flip()
+    pg.quit()
 
 main()
 
