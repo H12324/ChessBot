@@ -63,30 +63,21 @@ class Board:
     def getBoardState(self):
         return self.board
 
-    def updateState(self, state):
-        self.board = state
 
-    def movePiece(self, pos1, pos2):
-        #Maybe have a special rule here for castling
-        self.board[place2] = self.board[place1]
-        self.board[place1] = 0
-        return board
+    def movePiece(self, posA, posB):
+        self.board[posB] = self.board[posA] #Don't know enough about python to understand but hope this works
+        self.board[posA] = Square()
+        
     
     #MOVE GENERATION FUNCTIONS (maybe move to a seperate class)
     #------------------------------------------------------------------------#
     #Get moves functions
-    def getAllValidMoves(colour):
-        pass
-
-    def getAllPawnMoves(colour, position):
-       #Should have something to account for pawn being able to jump 2 during the first round
-       pass
-
 
     #Pawns can move +-8 positions on board when unnocupied
     #Pawns can capture enemy pieces that are +- 7 or 9
     #INSERT EN POSSANT RULES
-    def getPawnMoves(self, board, position):
+    def getPawnMoves(self, position):
+        board = self.board #I don't want to type it multiple times
         possibleMoves = []
         color = board[position].colour
         #Variable definitions to make code more readable
@@ -114,7 +105,8 @@ class Board:
         
         return possibleMoves
 
-    def getKnightMoves(self, board, position):
+    def getKnightMoves(self, position):
+        board = self.board
         possibleMoves = []
         invalid = -2
         color = board[position].colour
@@ -126,7 +118,9 @@ class Board:
         return possibleMoves
 
     #Generate moves, for Queen (true, true), Rook (true, false), and Bishop (false, true)
-    def getSlidingMoves(self, board, position, vert = True, diag = True):
+    def getSlidingMoves(self, position, vert = True, diag = True):
+        #Note: Can probably remove vert and diag and just check piece type in the function
+        board = self.board
         possibleMoves = []
         movements = []
         invalid = -2
@@ -145,7 +139,8 @@ class Board:
         return possibleMoves
     
     #Still need to add checkmate conditions but should be fine as a starter
-    def getKingMoves(self, board, position):
+    def getKingMoves(self, position):
+        board = self.board
         possibleMoves = []
         invalid = -2
         color = board[position].colour
@@ -155,8 +150,25 @@ class Board:
             if (board[trg].colour != invalid and board[trg].colour != color):
                 possibleMoves.append(trg)
         return possibleMoves
-
-                  
+    
+    #General get move
+    def getMoves(self, position):
+        
+        piece = self.board[position].piece
+        if (piece == 0 or piece == 6): #Pawn
+            return self.getPawnMoves(position) 
+        elif (piece == 1 or piece == 7): #kNIGHT
+            return self.getKnightMoves(position)
+        elif (piece == 2 or piece == 8): #Rook
+            return self.getSlidingMoves(position, diag = False) 
+        elif (piece == 3 or piece == 9): #Bishop
+            return self.getSlidingMoves(position, vert = False)
+        elif (piece == 4 or piece == 10): #Queen
+            return self.getSlidingMoves(position) 
+        elif (piece == 5 or piece == 11): #King
+            return self.getKingMoves(position)
+        else:
+            return []
 #Helper function that converts the 8x8 array to a 10x12 array
 #Because I'm too lazy to edit the fenstring code
 def convertTo10x12(board):
@@ -169,22 +181,20 @@ def convertTo10x12(board):
 
 class Square:
     #Let black = 1; white = -1 and empty square has colour of 0
-    def __init__(self, piece, colour):
+    def __init__(self, piece = -1, colour = 0): #Default to empty square
         self.piece = piece
-        #self.position = position
         self.colour = colour
-        #self.image = 0
     
                                                   
 #Some code for testing functions
-#fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-#chessB = Board()
-#pawnMv = chessB.getSlidingMoves(chessB.board, 31, vert = False)
 #"""for i in range(12):
-#    word = ""
+#   word = ""
 #    for j in range(10):
 #        word += str(chessB.board[i*10 + j].colour)
 #    print(word)"""
 
+#fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+#chessB = Board()
+#pawnMv = chessB.getMoves(22)
 #print(pawnMv)
 

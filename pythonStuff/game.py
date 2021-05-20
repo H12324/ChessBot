@@ -34,41 +34,28 @@ def drawPieces(screen, images, board, squareSize):
 
 def screenPosToBoard(squareSize, mousePos):
     #Function takes mousePosition and returns the index on the board it corresponds to
-    return (mousePos[0] // squareSize) + 8*(mousePos[1] // squareSize) #x + y*8 = position
-    
+    #return (mousePos[0] // squareSize) + 8*(mousePos[1] // squareSize) #x + y*8 = position (8x8 implementation)
+    return (mousePos[0] // squareSize + 21) + 10*((mousePos[1]//squareSize)) #10x12 implementation
 
 #Main Stuff
 def main():
     #Initialize Window Details
     (width, height) = (800, 800) #Self-explanatory
+    squareSize = width // 8
     background_colour = (24,25,26)
-    #background_colour = (36,0x19,0x26)
     screen = pg.display.set_mode((width, height))
     screen.fill(background_colour)
     pg.display.set_caption('Chess')
 
-    #Tweak these depending on aesthetic
-    offsetX = width / 64 
-    offsetY = height / 64 
-
-    offsetX = 0
-    offsetY = 0
-
-    whiteSquare = 0xEEEED2
-    blackSquare = 0x769656
-    squareSize = width // 8
 
     #Load images
     images = loadImages(squareSize) #NOTE: edit the function later so that the square size doesn't need to be a parameter
     drawBoard(squareSize, screen)
     cBoard = chess.Board() 
     board = cBoard.board
-    drawPieces(screen, images, board, squareSize)
-
-    
+    drawPieces(screen, images, board, squareSize)    
 
     pg.display.flip() #Updates display, i think 
-
 
     #Run the window (Game Loop)
     running = True
@@ -80,8 +67,12 @@ def main():
                 #I want drag and drop but I'm too lazy to work for it
                 goober = pg.mouse.get_pos()
                 boardPos = screenPosToBoard(squareSize, goober)
-
-        
+                #print(boardPos)
+                possibleMoves = cBoard.getMoves(boardPos)
+                print(len(possibleMoves))
+                if len(possibleMoves): #Should pass true as long as not 0
+                    cBoard.movePiece(boardPos, possibleMoves[0])
+                    drawPieces(screen, images, cBoard.board, squareSize)
         pg.display.flip()
     pg.quit()
 
