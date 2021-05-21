@@ -1,4 +1,6 @@
 import pygame as pg
+import random
+
 import chess
 #from chess import Board as board
 
@@ -7,7 +9,8 @@ def loadImages(squareSize):
     pieces = ["bP", "bN", "bR", "bB", "bQ", "bK", "wP", "wN", "wR", "wB", "wQ", "wK"]
     images = []
     for piece in pieces:
-        images.append(pg.image.load('assets/' + piece + '.png'))
+        #images.append(pg.image.load('assets/' + piece + '.png'))   #NOTE: figure out how to make python paths work and avoid working directory weirdness
+        images.append(pg.image.load('pythonStuff/assets/' + piece + '.png'))
     for piece in range(len(images)):
         images[piece] = pg.transform.scale(images[piece], (squareSize,squareSize))
     return images
@@ -65,13 +68,11 @@ def main():
                 running = False
             elif event.type == pg.MOUSEBUTTONDOWN: #Things related to moving the pieces with the mouse
                 #I want drag and drop but I'm too lazy to work for it
-                goober = pg.mouse.get_pos()
-                boardPos = screenPosToBoard(squareSize, goober)
-                #print(boardPos)
-                possibleMoves = cBoard.getMoves(boardPos)
-                print(len(possibleMoves))
+                boardPos = screenPosToBoard(squareSize, pg.mouse.get_pos())
+                possibleMoves = cBoard.getMoves(boardPos)                   #List of possible moves piece can perform
                 if len(possibleMoves): #Should pass true as long as not 0
-                    cBoard.movePiece(boardPos, possibleMoves[0])
+                    cBoard.movePiece(boardPos, possibleMoves[random.randint(0, len(possibleMoves) - 1)])
+                    drawBoard(squareSize, screen) #Probably better to only draw & erase certain pieces but this is easier to implement and don't really need to be that fast
                     drawPieces(screen, images, cBoard.board, squareSize)
         pg.display.flip()
     pg.quit()
@@ -79,11 +80,5 @@ def main():
 main()
 
 
-"""
-Board class []
--comprised of pieces
--can call moves for individual pieces
-
-"""
 
 
