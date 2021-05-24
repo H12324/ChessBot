@@ -65,8 +65,8 @@ class Board:
 
 
     def movePiece(self, posA, posB):
-        self.board[posB] = self.board[posA] #Don't know enough about python to understand but hope this works
-        self.board[posA] = Square()
+        self.board[posB].transfer(self.board[posA]) #Pretty sure this shouldn't be a shallow copy
+        self.board[posA].empty()
         
     
     #MOVE GENERATION FUNCTIONS (maybe move to a seperate class)
@@ -184,6 +184,14 @@ class Square:
     def __init__(self, piece = -1, colour = 0): #Default to empty square
         self.piece = piece
         self.colour = colour
+
+    def transfer(self, otherSqr):      #Copy contents of one square into another
+        self.piece = otherSqr.piece
+        self.colour = otherSqr.colour
+
+    def empty(self):     #set square to be empty 
+        self.piece = -1
+        self.colour = 0
     
                                                   
 #Some code for testing functions

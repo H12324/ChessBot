@@ -9,7 +9,7 @@ Now its more like 2 Chess engines being developed simultaneously in both python 
 Base Game:
 - Board Representation (Mailbox) ✓
 - Move generation ✓
-- Integrating with GUI
+- Integrating with GUI ✓
 - Checkmate/Win conditions
 - Advanced Rules
 
