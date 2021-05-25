@@ -58,6 +58,8 @@ class Board:
                     board.append(Square(empty,0)) #Let this represent an empty square for now
              
         self.board = convertTo10x12(board) #lol i'm a big clown, spent an hour debugging looking turns out it was one extra indent...
+        self.lastMove = (0,0) #From and To
+        self.check = [0,0]      #0 is white, 1 is black
 
     #Maybe create a movelist / tracker and implement undo move feature            
     def getBoardState(self):
@@ -67,11 +69,30 @@ class Board:
     def movePiece(self, posA, posB):
         self.board[posB].transfer(self.board[posA]) #Pretty sure this shouldn't be a shallow copy
         self.board[posA].empty()
+        self.lastMove = (posA, posB)                #keep track of last move
+        
+        #Check if there has been a check
+        possibleMoves = self.getMoves(posB)
+        k = 5       #I should really just make these the same but I don't feel like rewriting code
+        K = 11
+        for move in possibleMoves:
+            if self.board[move].piece == k or self.board[move].piece == K:
+                self.check[(self.board[move].colour + 1) // 2] = 1
+                print("check")
+        
+
         
     
     #MOVE GENERATION FUNCTIONS (maybe move to a seperate class)
     #------------------------------------------------------------------------#
     #Get moves functions
+
+    def getAllPseudoLegalMoves(self, color):    #All moves of a color disregarding checks
+        possibleMoves = []
+        for piece in self.board:
+            if piece.colour == color:
+                possibleMoves.extend(self.getMoves(piece.position))   #Might remove position parameter and use nested for loop, would technically be faster
+        return possibleMoves
 
     #Pawns can move +-8 positions on board when unnocupied
     #Pawns can capture enemy pieces that are +- 7 or 9
@@ -141,7 +162,9 @@ class Board:
     #Still need to add checkmate conditions but should be fine as a starter
     def getKingMoves(self, position):
         board = self.board
+
         possibleMoves = []
+
         invalid = -2
         color = board[position].colour
         movements = [11, 10, 9, 1, -1,  -9, -10, -11]
@@ -149,6 +172,9 @@ class Board:
             trg = move + position   #Target square
             if (board[trg].colour != invalid and board[trg].colour != color):
                 possibleMoves.append(trg)
+
+        #NOTE: find some fix for king walking into a check
+        
         return possibleMoves
     
     #General get move
@@ -169,6 +195,23 @@ class Board:
             return self.getKingMoves(position)
         else:
             return []
+    
+    def getMovesAdvanced(self, position):      #Get move function accounting for KingCheckWeirdness
+        color = self.board[position].colour    #Readability variables
+        piece = self.board[position].piece
+        possibleMoves = self.getMoves(position)
+        
+        """if (piece == 5 or piece == 11): #King
+            enemyMoves = self.getAllPseudoLegalMoves(-color)
+            playerMoves = []
+            #King cannot move in a possible move for the enemy
+            for move in possibleMoves:
+                if move not in enemyMoves:
+                    playerMoves.append(move)
+            return playerMoves"""
+        return possibleMoves
+        
+
 #Helper function that converts the 8x8 array to a 10x12 array
 #Because I'm too lazy to edit the fenstring code
 def convertTo10x12(board):
@@ -176,14 +219,16 @@ def convertTo10x12(board):
     newBoard = [Square(invalid, invalid)]*120
     for row in range(2, 10):
         for col in range(1, 9):
-            newBoard[row*10 + col] =  board[(row-2)*8+(col-1)]         
+            newBoard[row*10 + col] =  board[(row-2)*8+(col-1)]
+            newBoard[row*10 + col].position = row*10 + col          #May remove         
     return newBoard
 
 class Square:
     #Let black = 1; white = -1 and empty square has colour of 0
-    def __init__(self, piece = -1, colour = 0): #Default to empty square
+    def __init__(self, piece = -1, colour = 0, position = 0): #Default to empty square
         self.piece = piece
         self.colour = colour
+        self.position = position
 
     def transfer(self, otherSqr):      #Copy contents of one square into another
         self.piece = otherSqr.piece
@@ -193,6 +238,10 @@ class Square:
         self.piece = -1
         self.colour = 0
     
+    #Ideas for getting check/mate
+    #Use pseudo legal moves until find out in check (using lastMove)
+    #Then use special move generation
+    #   - find all the moves of enemy if they can take piece than no move
                                                   
 #Some code for testing functions
 #"""for i in range(12):

@@ -12,7 +12,7 @@ def loadImages(SQUARE_SIZE):
     images = []
     for piece in pieces:
         #images.append(pg.image.load('assets/' + piece + '.png'))   #NOTE: figure out how to make python paths work and avoid working directory weirdness
-        images.append(pg.image.load('pythonStuff/assets/' + piece + '.png'))
+        images.append(pg.image.load('pythonEngine/assets/' + piece + '.png'))
     for piece in range(len(images)):
         
         
@@ -124,7 +124,7 @@ def main():  #I structured this weirdly, maybe fix later
             elif event.type == pg.MOUSEBUTTONDOWN: #Things related to moving the pieces with the mouse
                 #I want drag and drop but I'm too lazy to work for it
                 boardPos = screenPosToBoard(SQUARE_SIZE, pg.mouse.get_pos()) #Get the piece they clicked on
-                possibleMoves = cBoard.getMoves(boardPos)               #List of possible moves piece can perform
+                possibleMoves = cBoard.getMovesAdvanced(boardPos)               #List of possible moves piece can perform
                 #print(boardToScreenPos(SQUARE_SIZE, boardPos))
                 if len(possibleMoves) and cBoard.board[boardPos].colour == currentTurn : #Should pass true as long as not 0
                     #Get move
@@ -141,7 +141,7 @@ def main():  #I structured this weirdly, maybe fix later
                                     clickedValid = False
                                 elif cBoard.board[secondPos].colour == currentTurn:
                                     boardPos = secondPos
-                                    possibleMoves = cBoard.getMoves(boardPos)
+                                    possibleMoves = cBoard.getMovesAdvanced(boardPos)
                                     highlightMoves(possibleMoves, boardPos)
                                     #clickedValid = False
                                 elif secondPos in possibleMoves:
