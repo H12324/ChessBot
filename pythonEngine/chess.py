@@ -62,9 +62,6 @@ class Board:
         self.check = [0,0]      #0 is white, 1 is black
 
     #Maybe create a movelist / tracker and implement undo move feature            
-    def getBoardState(self):
-        return self.board
-
 
     def movePiece(self, posA, posB):
         self.board[posB].transfer(self.board[posA]) #Pretty sure this shouldn't be a shallow copy
@@ -200,15 +197,6 @@ class Board:
         color = self.board[position].colour    #Readability variables
         piece = self.board[position].piece
         possibleMoves = self.getMoves(position)
-        
-        """if (piece == 5 or piece == 11): #King
-            enemyMoves = self.getAllPseudoLegalMoves(-color)
-            playerMoves = []
-            #King cannot move in a possible move for the enemy
-            for move in possibleMoves:
-                if move not in enemyMoves:
-                    playerMoves.append(move)
-            return playerMoves"""
         return possibleMoves
         
 
