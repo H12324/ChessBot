@@ -10,7 +10,7 @@ Base Game:
 - Board Representation (Mailbox) ✓
 - Move generation ✓
 - Integrating with GUI ✓
-- Checkmate/Win conditions
+- Checkmate/Win conditions 50%
 - Advanced Rules
 AI Development:
 - Test if game is fully functional
@@ -18,7 +18,7 @@ AI Development:
 - Alpha-Beta Pruning
 - Further optimizations
 ## C++:
-- Board Representation (Bitboard)
+- Board Representation (Bitboard) ✓
 - Move Generation
 - Advanced Moves
 - Win Conditions

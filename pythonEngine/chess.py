@@ -1,5 +1,12 @@
 #A class for pieces
-
+#I'll leave these as global variables for now, maybe i'll move them back later
+EMPTY = -1  #Maybe change to empty = 0, invalid = -1
+PAWN = 0
+KNIGHT = 1
+ROOK = 2
+BISHOP = 3
+QUEEN = 4
+KING = 5
 class Board:
     def __init__(self, fenString = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"):
         #Turns a FEN string into a board
@@ -7,13 +14,7 @@ class Board:
         #Currently a 8x8 representation, might alter to 10x12 to make easier
     
         board = []
-        empty = -1  #Maybe change to empty = 0, invalid = -1
-        PAWN = 0
-        KNIGHT = 1
-        ROOK = 2
-        BISHOP = 3
-        QUEEN = 4
-        KING = 5
+
         
         bl = 1
         wh = -1
@@ -50,7 +51,7 @@ class Board:
             #Spaces
             elif letter != "/":
                 for i in range(int(letter)):
-                    board.append(Square(empty,0)) #Let this represent an empty square for now
+                    board.append(Square(EMPTY,0)) #Let this represent an empty square for now
              
         self.board = convertTo10x12(board) #lol i'm a big clown, spent an hour debugging looking turns out it was one extra indent...
         self.lastMove = (0,0) #From and To
@@ -65,7 +66,6 @@ class Board:
         
         #Check if there has been a check
         possibleMoves = self.getMoves(posB)
-        KING = 5       #I should really just make these the same but I don't feel like rewriting code
         for move in possibleMoves:
             if self.board[move].piece == KING:
                 self.check[(self.board[move].colour + 1) // 2] = 1
@@ -77,7 +77,6 @@ class Board:
     #MOVE GENERATION FUNCTIONS (maybe move to a seperate class)
     #------------------------------------------------------------------------#
     #Get moves functions
-
     def getAllPseudoLegalMoves(self, color):    #All moves of a color disregarding checks
         possibleMoves = []
         for piece in self.board:
@@ -159,12 +158,45 @@ class Board:
         invalid = -2
         color = board[position].colour
         movements = [11, 10, 9, 1, -1,  -9, -10, -11]
+        pawnMv = [9, 11]
+        knightMv = [12, 8, 21, 19, -12, -8, -21, -19]
+        cardMv = [1, -1 , 10, -10] #Moves for cardinal directions
+        diagMv = [11, 9, -11, -9]  #Diagonals
 
-        #enemyMovements = [-11*color,-9*color]
-
+        #There's probably a way to make this more efficient but brute force for now
         for move in movements:
             trg = move + position   #Target square
-            if (board[trg].colour != invalid and board[trg].colour != color):
+            valid = False
+            if (board[trg].colour == -color or board[trg].colour == 0):   #Check if spot is enemy or if its empty
+                valid = True    #Flag true so far
+                #Check if pawn in way of move
+                for mv in pawnMv:
+                    loc = trg + mv*(color)  #Check to see if pawn can attack from that location
+                    if board[loc].piece == PAWN and board[loc].colour == -color:
+                        valid = False   #flag false
+                
+                #Check if knight in way of move
+                for mv in knightMv: #Can probably combine pawnMv and knightMv into 2d array type structure
+                    loc = trg + mv #Check to see if pawn can attack from that location
+                    if board[loc].piece == KNIGHT and board[loc].colour == -color:
+                        valid = False   #flag false
+
+                #Insert something for sliding moves
+                for mv in cardMv:
+                    loc = trg + mv
+                    while board[loc].colour == 0:
+                        loc = loc + mv
+                    if (board[loc].piece == QUEEN or board[loc].piece == ROOK) and board[loc].colour == -color:
+                        valid = False
+                
+                for mv in diagMv:
+                    loc = trg + mv
+                    while board[loc].colour == 0:
+                        loc = loc + mv
+                    if (board[loc].piece == QUEEN or board[loc].piece == BISHOP) and board[loc].colour == -color:
+                        valid = False
+
+            if valid == True:
                 possibleMoves.append(trg)
             
         #Lol let's just brute force this
