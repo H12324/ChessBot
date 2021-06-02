@@ -8,47 +8,42 @@ class Board:
     
         board = []
         empty = -1  #Maybe change to empty = 0, invalid = -1
-        p = 0
-        n = 1
-        r = 2
-        b = 3
-        q = 4
-        k = 5
-        P = 6
-        N = 7
-        R = 8
-        B = 9
-        Q = 10
-        K = 11
+        PAWN = 0
+        KNIGHT = 1
+        ROOK = 2
+        BISHOP = 3
+        QUEEN = 4
+        KING = 5
+        
         bl = 1
         wh = -1
        #Note: it is kinda pointless to differentiate between p and P 
         for letter in fenString:
             #12 pieces could use better approach but lazy
             if letter == "p":
-                board.append(Square(p, bl))
+                board.append(Square(PAWN, bl))
             elif letter == "P":
-                board.append(Square(P, wh))
+                board.append(Square(PAWN, wh))
             elif letter == "b":
-                board.append(Square(b, bl))
+                board.append(Square(BISHOP, bl))
             elif letter == "B":
-                board.append(Square(B, wh))
+                board.append(Square(BISHOP, wh))
             elif letter == "n":
-                board.append(Square(n, bl))
+                board.append(Square(KNIGHT, bl))
             elif letter == "N":
-                board.append(Square(N, wh))
+                board.append(Square(KNIGHT, wh))
             elif letter == "Q":
-                board.append(Square(Q, wh))
+                board.append(Square(QUEEN, wh))
             elif letter == "q":
-                board.append(Square(q, bl))
+                board.append(Square(QUEEN, bl))
             elif letter == "r":
-                board.append(Square(r, bl))
+                board.append(Square(ROOK, bl))
             elif letter == "R":
-                board.append(Square(R, wh))
+                board.append(Square(ROOK, wh))
             elif letter == "k":
-                board.append(Square(k,bl))
+                board.append(Square(KING,bl))
             elif letter == "K":
-                board.append(Square(K,wh))
+                board.append(Square(KING,wh))
             #Exit for now here because I don't want to implement/fix
             elif letter == " ":
                 break
@@ -70,10 +65,9 @@ class Board:
         
         #Check if there has been a check
         possibleMoves = self.getMoves(posB)
-        k = 5       #I should really just make these the same but I don't feel like rewriting code
-        K = 11
+        KING = 5       #I should really just make these the same but I don't feel like rewriting code
         for move in possibleMoves:
-            if self.board[move].piece == k or self.board[move].piece == K:
+            if self.board[move].piece == KING:
                 self.check[(self.board[move].colour + 1) // 2] = 1
                 print("check")
         
@@ -165,11 +159,15 @@ class Board:
         invalid = -2
         color = board[position].colour
         movements = [11, 10, 9, 1, -1,  -9, -10, -11]
+
+        #enemyMovements = [-11*color,-9*color]
+
         for move in movements:
             trg = move + position   #Target square
             if (board[trg].colour != invalid and board[trg].colour != color):
                 possibleMoves.append(trg)
-
+            
+        #Lol let's just brute force this
         #NOTE: find some fix for king walking into a check
         
         return possibleMoves
@@ -178,17 +176,18 @@ class Board:
     def getMoves(self, position):
         
         piece = self.board[position].piece
-        if (piece == 0 or piece == 6): #Pawn
+        if (piece == 0): #Pawn
             return self.getPawnMoves(position) 
-        elif (piece == 1 or piece == 7): #kNIGHT
+            
+        elif (piece == 1): #kNIGHT
             return self.getKnightMoves(position)
-        elif (piece == 2 or piece == 8): #Rook
+        elif (piece == 2): #Rook
             return self.getSlidingMoves(position, diag = False) 
-        elif (piece == 3 or piece == 9): #Bishop
+        elif (piece == 3): #Bishop
             return self.getSlidingMoves(position, vert = False)
-        elif (piece == 4 or piece == 10): #Queen
+        elif (piece == 4 ): #Queen
             return self.getSlidingMoves(position) 
-        elif (piece == 5 or piece == 11): #King
+        elif (piece == 5): #King
             return self.getKingMoves(position)
         else:
             return []
@@ -196,6 +195,8 @@ class Board:
     def getMovesAdvanced(self, position):      #Get move function accounting for KingCheckWeirdness
         color = self.board[position].colour    #Readability variables
         piece = self.board[position].piece
+
+        
         possibleMoves = self.getMoves(position)
         return possibleMoves
         

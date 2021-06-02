@@ -14,8 +14,6 @@ def loadImages(SQUARE_SIZE):
         #images.append(pg.image.load('assets/' + piece + '.png'))   #NOTE: figure out how to make python paths work and avoid working directory weirdness
         images.append(pg.image.load('pythonEngine/assets/' + piece + '.png'))
     for piece in range(len(images)):
-        
-        
         #images[piece] = pg.transform.scale(images[piece], (SQUARE_SIZE, SQUARE_SIZE))
         images[piece] = pg.transform.smoothscale(images[piece], (SQUARE_SIZE,SQUARE_SIZE))
     return images
@@ -31,12 +29,15 @@ def drawBoard():
             pg.draw.rect(screen, (whiteSquare-blackSquare) * ((i + j + 1) % 2) + blackSquare, pg.Rect(SQUARE_SIZE *  i , SQUARE_SIZE * j, SQUARE_SIZE, SQUARE_SIZE))
             
 def drawPieces(board):      #NOTE: Technically don't need board because cBoard is a global variable but oh well might fix later
-    index = 0 #Actual index of the board in the 10x12
+    index = 0 
     for i in range(8):
         for j in range(8):
-            index = (i + 2) *10 + (j + 1) 
-            if board[index].colour !=  0:
-                screen.blit(images[board[index].piece], pg.Rect(SQUARE_SIZE *  j , SQUARE_SIZE * i, SQUARE_SIZE, SQUARE_SIZE))
+            index = (i + 2) *10 + (j + 1) #Actual index of the board in the 10x12 format
+            onscreen_loc = pg.Rect(SQUARE_SIZE *  j , SQUARE_SIZE * i, SQUARE_SIZE, SQUARE_SIZE)   #The square onscreen where it will be drawn, for readability
+            if board[index].colour ==  1:
+                screen.blit(images[board[index].piece], onscreen_loc)
+            elif board[index].colour ==  -1:
+                screen.blit(images[board[index].piece + 6], onscreen_loc) #White pieces offset in index by 6
 
 def updateScreen(board):        
     drawBoard()
