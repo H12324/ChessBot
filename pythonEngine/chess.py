@@ -7,6 +7,8 @@ ROOK = 2
 BISHOP = 3
 QUEEN = 4
 KING = 5
+WHITE = -1
+BLACK = 1
 class Board:
     def __init__(self, fenString = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"):
         #Turns a FEN string into a board
@@ -18,7 +20,7 @@ class Board:
         
         bl = 1
         wh = -1
-       #Note: it is kinda pointless to differentiate between p and P 
+       #Note: it is kinda pointless to differentiate between p and P
         for letter in fenString:
             #12 pieces could use better approach but lazy
             if letter == "p":
@@ -55,7 +57,9 @@ class Board:
              
         self.board = convertTo10x12(board) #lol i'm a big clown, spent an hour debugging looking turns out it was one extra indent...
         self.lastMove = (0,0) #From and To
-        self.check = [0,0]      #0 is white, 1 is black
+        self.check = 0  #Only one player can be in check var will be colour, NOTE: look into double check
+        self.checkPosition = 0 #Position of piece in check
+        self.king = [25, 95] #Location of the king, hard coded for now, fix after fixing
 
     #Maybe create a movelist / tracker and implement undo move feature            
 
@@ -64,15 +68,24 @@ class Board:
         self.board[posA].empty()
         self.lastMove = (posA, posB)                #keep track of last move
         
+        if self.check != 0:
+            self.check = 0 
+            self.checkPosition = 0
+
         #Check if there has been a check
         possibleMoves = self.getMoves(posB)
         for move in possibleMoves:
             if self.board[move].piece == KING:
-                self.check[(self.board[move].colour + 1) // 2] = 1
-                print("check")
-        
+                self.check = self.board[move].colour  
+                self.checkPosition = posB
+                print("Check")
 
-        
+    #Function checks if colour is in check
+    def isCheck(self, colour):
+        for move in self.getAllPseudoLegalMoves(BLACK):
+            if self.board[move].piece == KING:
+                return True
+        return False
     
     #MOVE GENERATION FUNCTIONS (maybe move to a seperate class)
     #------------------------------------------------------------------------#
@@ -210,7 +223,6 @@ class Board:
         piece = self.board[position].piece
         if (piece == 0): #Pawn
             return self.getPawnMoves(position) 
-            
         elif (piece == 1): #kNIGHT
             return self.getKnightMoves(position)
         elif (piece == 2): #Rook
@@ -224,14 +236,86 @@ class Board:
         else:
             return []
     
+    #Returns moves that are legal for pieces (other than the king) for when the king is in check
+    def getLegalCheckMoves(self):
+        #Get all legal moves when in check
+        pieceClr = self.check   #Colour of the piece currently in check
+        kingPos = self.getKingPosition(pieceClr)
+        checker = self.board[self.checkPosition].piece  #Piece that put it in check
+        #Only possible moves are the king moving out of the way
+        #Or if a piece blocks that attack
+        #So i should return king moves extended with the possible moves of the piece that has put the king in check
+        
+
+        possibleMoves = [] 
+        
+        if checker == PAWN or checker == KNIGHT:      #Technically only need to check if its not a knight
+            possibleMoves.append(self.checkPosition)
+        else:
+            possibleMoves.append(self.checkPosition)
+            #Can find a direction vector by knowing the position of the king and checker
+            checkA = self.checkPosition // 10 #Ten's digit of checker position
+            checkB = self.checkPosition %  10 #One's digit
+
+            kingA = kingPos // 10
+            kingB = kingPos % 10
+                                        
+            directionVector = 0         #0 Vertical translation when equal, directionVector should technically never end up being 0
+            if checkA < kingA:
+                directionVector = 10   
+            elif checkA > kingA:
+                directionVector = -10
+
+            if checkB < kingB:          #Horizontal component of vector
+                directionVector = directionVector + 1
+            elif checkB < kingB:
+                directionVector = directionVector - 1
+            
+            print(directionVector)
+
+            tracker = self.checkPosition
+            while tracker != kingPos: #will add legal moves until it reaches the kingPosition
+                possibleMoves.append(tracker)
+                tracker += directionVector
+            print ("Done")
+        
+        return possibleMoves
+
+                
+
+    def getKingPosition(self, colour):  #Will probably remove function later when optimizing and just insert king position into class
+        for piece in self.board:
+            if piece.piece == KING and piece.colour == colour:
+                return piece.position
+        print("Error Occured")
+
+
     def getMovesAdvanced(self, position):      #Get move function accounting for KingCheckWeirdness
         color = self.board[position].colour    #Readability variables
         piece = self.board[position].piece
 
+        if color == 0:  #Case where player clicks on blank square
+            return []
+
+        if self.check != color: #If not in check getMoves normally
+            possibleMoves = self.getMoves(position)
+            return possibleMoves
+        else:
+            if piece == KING:
+                possibleMoves = self.getKingMoves(position)
+            else:
+                #Use sets to make finding the intersection easier
+                legalMoves = set(self.getLegalCheckMoves())  #Legal squares to intercept the checker
+                pseudoLegalMoves = set(self.getMoves(position)) #The possible moves the piece can make
+                possibleMoves = list(pseudoLegalMoves.intersection(legalMoves)) #possibleMoves is the pseudoLegalMoves that are legal in check
+            return possibleMoves
         
-        possibleMoves = self.getMoves(position)
-        return possibleMoves
-        
+    def isCheckMate(self):
+        if len(self.getLegalCheckMoves()) + len(self.getKingMoves(self.getKingPosition(self.check))) == 0:
+            print("Checkmate")
+            return True
+        else:
+            return False
 
 #Helper function that converts the 8x8 array to a 10x12 array
 #Because I'm too lazy to edit the fenstring code
@@ -241,7 +325,9 @@ def convertTo10x12(board):
     for row in range(2, 10):
         for col in range(1, 9):
             newBoard[row*10 + col] =  board[(row-2)*8+(col-1)]
-            newBoard[row*10 + col].position = row*10 + col          #May remove         
+            newBoard[row*10 + col].position = row*10 + col          #May remove   
+            
+            
     return newBoard
 
 class Square:

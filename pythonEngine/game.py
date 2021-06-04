@@ -84,6 +84,10 @@ def boardToScreenPos(SQUARE_SIZE, boardPos):
 def doMove(boardPos, move):
     cBoard.movePiece(boardPos, move)
     updateScreen(cBoard.board)
+    #if cBoard.check != 0:
+    #    isCheck = cBoard.isCheckMate()
+    #    if isCheck:
+    #        print("Game Over")
     
     
   
@@ -125,7 +129,10 @@ def main():  #I structured this weirdly, maybe fix later
             elif event.type == pg.MOUSEBUTTONDOWN: #Things related to moving the pieces with the mouse
                 #I want drag and drop but I'm too lazy to work for it
                 boardPos = screenPosToBoard(SQUARE_SIZE, pg.mouse.get_pos()) #Get the piece they clicked on
-                possibleMoves = cBoard.getMovesAdvanced(boardPos)               #List of possible moves piece can perform
+                if cBoard.board[boardPos].colour == currentTurn:
+                    possibleMoves = cBoard.getMovesAdvanced(boardPos)               #List of possible moves piece can perform
+                else:
+                    possibleMoves = []
                 #print(boardToScreenPos(SQUARE_SIZE, boardPos))
                 if len(possibleMoves) and cBoard.board[boardPos].colour == currentTurn : #Should pass true as long as not 0
                     #Get move
