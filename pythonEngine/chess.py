@@ -268,16 +268,17 @@ class Board:
 
             if checkB < kingB:          #Horizontal component of vector
                 directionVector = directionVector + 1
-            elif checkB < kingB:
+            elif checkB > kingB:
                 directionVector = directionVector - 1
             
-            print(directionVector)
+            
 
             tracker = self.checkPosition
+            #print(directionVector, tracker, kingPos) #Debugging code
             while tracker != kingPos: #will add legal moves until it reaches the kingPosition
                 possibleMoves.append(tracker)
                 tracker += directionVector
-            print ("Done")
+            #print ("Done")
         
         return possibleMoves
 
@@ -310,12 +311,16 @@ class Board:
                 possibleMoves = list(pseudoLegalMoves.intersection(legalMoves)) #possibleMoves is the pseudoLegalMoves that are legal in check
             return possibleMoves
         
-    def isCheckMate(self):
-        if len(self.getLegalCheckMoves()) + len(self.getKingMoves(self.getKingPosition(self.check))) == 0:
+    def isCheckMate(self, colour):
+        pseudoLegalMoves = set(self.getAllPseudoLegalMoves(colour))
+        legalMoves = set(self.getLegalCheckMoves())
+        possibleMoves = pseudoLegalMoves.intersection(legalMoves)   #Won't be empty if pieces can defend King
+        
+        if len(self.getKingMoves(self.getKingPosition(self.check))) + len(possibleMoves)== 0 :
             print("Checkmate")
             return True
-        else:
-            return False
+    
+        return False
 
 #Helper function that converts the 8x8 array to a 10x12 array
 #Because I'm too lazy to edit the fenstring code

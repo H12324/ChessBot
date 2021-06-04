@@ -84,10 +84,10 @@ def boardToScreenPos(SQUARE_SIZE, boardPos):
 def doMove(boardPos, move):
     cBoard.movePiece(boardPos, move)
     updateScreen(cBoard.board)
-    #if cBoard.check != 0:
-    #    isCheck = cBoard.isCheckMate()
-    #    if isCheck:
-    #        print("Game Over")
+    if cBoard.check != 0:
+        checkmate = cBoard.isCheckMate(cBoard.check)
+        if checkmate:
+            print("Game Over")
     
     
   
@@ -105,7 +105,7 @@ pg.display.set_caption('Chess')
 images = loadImages(SQUARE_SIZE) #NOTE: edit the function later so that the square size doesn't need to be a parameter
 highlight = pg.Surface((SQUARE_SIZE, SQUARE_SIZE), pg.SRCALPHA)
 #pg.draw.circle(highlight, (0, 0, 0, 128), (int(SQUARE_SIZE/2), int(SQUARE_SIZE/2)),int(SQUARE_SIZE/2), 2)
-
+pg.display.set_icon(images[1])
 
 cBoard = chess.Board() 
 
