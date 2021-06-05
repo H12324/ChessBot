@@ -62,6 +62,12 @@ class Board:
         self.king = [25, 95] #Location of the king, hard coded for now, fix after fixing
 
     #Maybe create a movelist / tracker and implement undo move feature            
+    def pseudoMove(self, posA, posB): #Moves piece, but doesn't change the board
+        testBoard = self.board
+        testBoard[posB].transfer(testBoard[posA]) #Pretty sure this shouldn't be a shallow copy
+        testBoard[posA].empty()
+        #Probably don't need to check for check
+        return testBoard
 
     def movePiece(self, posA, posB):
         self.board[posB].transfer(self.board[posA]) #Pretty sure this shouldn't be a shallow copy
@@ -80,12 +86,7 @@ class Board:
                 self.checkPosition = posB
                 print("Check")
 
-    #Function checks if colour is in check
-    def isCheck(self, colour):
-        for move in self.getAllPseudoLegalMoves(BLACK):
-            if self.board[move].piece == KING:
-                return True
-        return False
+    
     
     #MOVE GENERATION FUNCTIONS (maybe move to a seperate class)
     #------------------------------------------------------------------------#
@@ -168,7 +169,6 @@ class Board:
 
         possibleMoves = []
 
-        invalid = -2
         color = board[position].colour
         movements = [11, 10, 9, 1, -1,  -9, -10, -11]
         pawnMv = [9, 11]
@@ -299,7 +299,7 @@ class Board:
             return []
 
         if self.check != color: #If not in check getMoves normally
-            possibleMoves = self.getMoves(position)
+            possibleMoves = self.getLegalMove(position, self.getMoves(position))
             return possibleMoves
         else:
             if piece == KING:
@@ -310,7 +310,14 @@ class Board:
                 pseudoLegalMoves = set(self.getMoves(position)) #The possible moves the piece can make
                 possibleMoves = list(pseudoLegalMoves.intersection(legalMoves)) #possibleMoves is the pseudoLegalMoves that are legal in check
             return possibleMoves
-        
+    
+    #Function checks if colour is in check
+    def isCheck(self, colour):
+        for move in self.getAllPseudoLegalMoves(-colour):
+            if self.board[move].piece == KING:
+                return True
+        return False
+
     def isCheckMate(self, colour):
         pseudoLegalMoves = set(self.getAllPseudoLegalMoves(colour))
         legalMoves = set(self.getLegalCheckMoves())
@@ -321,7 +328,30 @@ class Board:
             return True
     
         return False
+    
+    def getLegalMove(self, position, possibleMoves): #Check if move will result in a checkmate
+        colour = self.board[position].colour
+        legalMoves = []
 
+        testBoard = []
+        for i in range(120):    #Deep copy, i hate this solution but it works i guess
+            testBoard.append(Square())
+            testBoard[i].piece = self.board[i].piece
+            testBoard[i].colour = self.board[i].colour
+
+        for move in possibleMoves:
+            self.board = self.pseudoMove(position, move) # = self.pseudoMove(position, move)     #Maybe change movePiece function so that it just returns a changed board 
+            if self.isCheck(colour) == False:
+                legalMoves.append(move)
+            
+            for i in range(120):    #Deep copy
+                self.board[i].piece  = testBoard[i].piece  
+                self.board[i].colour = testBoard[i].colour 
+        return legalMoves
+
+    
+
+            
 #Helper function that converts the 8x8 array to a 10x12 array
 #Because I'm too lazy to edit the fenstring code
 def convertTo10x12(board):
@@ -350,20 +380,5 @@ class Square:
         self.piece = -1
         self.colour = 0
     
-    #Ideas for getting check/mate
-    #Use pseudo legal moves until find out in check (using lastMove)
-    #Then use special move generation
-    #   - find all the moves of enemy if they can take piece than no move
-                                                  
-#Some code for testing functions
-#"""for i in range(12):
-#   word = ""
-#    for j in range(10):
-#        word += str(chessB.board[i*10 + j].colour)
-#    print(word)"""
 
-#fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-#chessB = Board()
-#pawnMv = chessB.getMoves(22)
-#print(pawnMv)
 

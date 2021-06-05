@@ -162,7 +162,7 @@ def main():  #I structured this weirdly, maybe fix later
                             elif e.type == pg.QUIT: #Quit while you're ahead champ
                                 running = False
                                 clickedValid = False
-                                  
+        updateScreen(cBoard.board)           
         #drawBoard(SQUARE_SIZE, screen) #Probably better to only draw & erase certain pieces but this is easier to implement and don't really need to be that fast
         #drawPieces(screen, images, cBoard.board, SQUARE_SIZE)            
         pg.display.flip()

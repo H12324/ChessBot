@@ -10,8 +10,13 @@ Base Game:
 - Board Representation (Mailbox) ✓
 - Move generation ✓
 - Integrating with GUI ✓
-- Checkmate/Win conditions 50%
+- Checkmate/Win conditions ✓
 - Advanced Rules
+    - Castling
+    - Promotion
+    - En Possant
+    - Stalemate
+
 AI Development:
 - Test if game is fully functional
 - Basic Minimax
