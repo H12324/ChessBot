@@ -78,6 +78,9 @@ class Board:
             self.check = 0 
             self.checkPosition = 0
 
+        if self.board[posB].piece == PAWN:
+            self.promotePawn(posB, QUEEN)   #When implementing with GUI probably move to Game.py
+
         #Check if there has been a check
         possibleMoves = self.getMoves(posB)
         for move in possibleMoves:
@@ -86,7 +89,10 @@ class Board:
                 self.checkPosition = posB
                 print("Check")
 
-    
+    def promotePawn(self, position, promotionPiece):
+        pawn = self.board[position]
+        if (pawn.colour == WHITE and position < 30) or (pawn.colour == BLACK and position > 90):
+            self.board[position].piece = promotionPiece
     
     #MOVE GENERATION FUNCTIONS (maybe move to a seperate class)
     #------------------------------------------------------------------------#

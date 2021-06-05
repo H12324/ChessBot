@@ -13,7 +13,7 @@ Base Game:
 - Checkmate/Win conditions ✓
 - Advanced Rules
     - Castling
-    - Promotion
+    - Promotion (50%)
     - En Possant
     - Stalemate
 
