@@ -58,7 +58,7 @@ class Board:
         self.checkPosition = 0 #Position of piece in check
         self.king = [25, 95] #Location of the king, hard coded for now, fix after fixing
         self.castle= [[True, True], [True, True]]   #[White[QueenSide, KingSide], Black[QueenSide, KingSide]]
-        
+        self.enPassant = False
 
     #Maybe create a movelist / tracker and implement undo move feature            
     def pseudoMove(self, posA, posB): #Moves piece, but doesn't change the board
@@ -72,13 +72,14 @@ class Board:
         self.board[posB].transfer(self.board[posA]) #Pretty sure this shouldn't be a shallow copy
         self.board[posA].empty()
         self.lastMove = (posA, posB)                #keep track of last move
-        
+
         if self.check != 0:
             self.check = 0 
             self.checkPosition = 0
 
         if self.board[posB].piece == PAWN:
             self.promotePawn(posB, QUEEN)   #When implementing with GUI probably move to Game.py
+            
         elif self.board[posB].piece == KING:
             self.castle[(self.board[posB].colour + 1) // 2][0] = False #Should probably make this more readable
             self.castle[(self.board[posB].colour + 1) // 2][1] = False
@@ -98,9 +99,6 @@ class Board:
                 self.checkPosition = posB
                 print("Check")
 
-    def movePieceAdvanced(self, posA, posB):
-        self.movePiece(posA, posB)
-
     def doCastle(self, kingPosition, castlePosition):
         #Might as well hard code this a bit
         castlePosition *= -1
@@ -118,6 +116,11 @@ class Board:
         
         self.castle[castleClrIndex][0] = False
         self.castle[castleClrIndex][1] = False
+
+    def doEnPassant(self, piece, passantSquare):
+        enemyPiece = passantSquare - 10*self.board[piece].colour
+        self.movePiece(piece, enemyPiece)
+        self.movePiece(enemyPiece, passantSquare)
 
     def promotePawn(self, position, promotionPiece):
         pawn = self.board[position]
@@ -163,6 +166,14 @@ class Board:
             possibleMoves.append(moveE)
 
         #Insert en possant code
+        passantSqr = self.lastMove[1]
+        if abs(self.lastMove[0] - passantSqr) == 20 and board[passantSqr].piece == PAWN:  #Detects if enPossant has occurred
+                if (board[moveW].colour == 0 and position - 1*color == passantSqr): #shouldnt seg fault anymore 
+                    possibleMoves.append(moveW)
+                #Capture enemy piece (East) aka shift 9
+                if (board[moveE].colour == 0 and position + 1*color == passantSqr): #eh I'll fix the segfault bug later after I fully decide how board representation will work
+                    possibleMoves.append(moveE)
+                
         
         return possibleMoves
 

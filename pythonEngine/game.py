@@ -84,7 +84,10 @@ def boardToScreenPos(SQUARE_SIZE, boardPos):
 
 def doMove(boardPos, move):
     if move > 0:
-        cBoard.movePiece(boardPos, move)
+        if cBoard.board[boardPos].piece == 0 and cBoard.board[move].colour == 0 and abs(boardPos - move) % 10 != 0: #NOTE: future hassam comment plz
+            cBoard.doEnPassant(boardPos, move)
+        else:
+            cBoard.movePiece(boardPos, move)
     else:
         cBoard.doCastle(boardPos, move)   #Represent castle as a negative move
     updateScreen(cBoard.board)
@@ -111,8 +114,9 @@ highlight = pg.Surface((SQUARE_SIZE, SQUARE_SIZE), pg.SRCALPHA)
 #pg.draw.circle(highlight, (0, 0, 0, 128), (int(SQUARE_SIZE/2), int(SQUARE_SIZE/2)),int(SQUARE_SIZE/2), 2)
 pg.display.set_icon(images[1])
 
-cBoard = chess.Board("r3kbnr/pb2pppp/nq1p4/1pp5/1P3PP1/NQP4N/PB1PP1BP/R3K2R w KQkq - 0 10")  #FEN to test castling, note still need to read full fen string
-#cBoard = chess.Board()
+#cBoard = chess.Board("r3kbnr/pb2pppp/nq1p4/1pp5/1P3PP1/NQP4N/PB1PP1BP/R3K2R w KQkq - 0 10")  #FEN to test castling, note still need to read full fen string
+cBoard = chess.Board()
+#"8/6bb/8/8/R1pP2k1/4P3/P7/K7 b - d3 after d2-d4"
 updateScreen(cBoard.board)  
 
 pg.display.flip() #Updates display, i think 
