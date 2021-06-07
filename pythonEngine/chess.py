@@ -1,5 +1,8 @@
 #A class for pieces
 #I'll leave these as global variables for now, maybe i'll move them back later
+from pygame import color
+
+
 EMPTY = -1  #Maybe change to empty = 0, invalid = -1
 PAWN = 0
 KNIGHT = 1
@@ -13,40 +16,34 @@ class Board:
     def __init__(self, fenString = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"):
         #Turns a FEN string into a board
         #Originally a helper function, might become one again to make code cleaner or for easily switching states
-        #Currently a 8x8 representation, might alter to 10x12 to make easier
-    
+        #NOTE: Remember to fully implement fenstring
         board = []
-
-        
-        bl = 1
-        wh = -1
-       #Note: it is kinda pointless to differentiate between p and P
         for letter in fenString:
             #12 pieces could use better approach but lazy
             if letter == "p":
-                board.append(Square(PAWN, bl))
+                board.append(Square(PAWN, BLACK))
             elif letter == "P":
-                board.append(Square(PAWN, wh))
+                board.append(Square(PAWN, WHITE))
             elif letter == "b":
-                board.append(Square(BISHOP, bl))
+                board.append(Square(BISHOP, BLACK))
             elif letter == "B":
-                board.append(Square(BISHOP, wh))
+                board.append(Square(BISHOP, WHITE))
             elif letter == "n":
-                board.append(Square(KNIGHT, bl))
+                board.append(Square(KNIGHT, BLACK))
             elif letter == "N":
-                board.append(Square(KNIGHT, wh))
+                board.append(Square(KNIGHT, WHITE))
             elif letter == "Q":
-                board.append(Square(QUEEN, wh))
+                board.append(Square(QUEEN, WHITE))
             elif letter == "q":
-                board.append(Square(QUEEN, bl))
+                board.append(Square(QUEEN, BLACK))
             elif letter == "r":
-                board.append(Square(ROOK, bl))
+                board.append(Square(ROOK, BLACK))
             elif letter == "R":
-                board.append(Square(ROOK, wh))
+                board.append(Square(ROOK, WHITE))
             elif letter == "k":
-                board.append(Square(KING,bl))
+                board.append(Square(KING, BLACK))
             elif letter == "K":
-                board.append(Square(KING,wh))
+                board.append(Square(KING, WHITE))
             #Exit for now here because I don't want to implement/fix
             elif letter == " ":
                 break
@@ -60,6 +57,8 @@ class Board:
         self.check = 0  #Only one player can be in check var will be colour, NOTE: look into double check
         self.checkPosition = 0 #Position of piece in check
         self.king = [25, 95] #Location of the king, hard coded for now, fix after fixing
+        self.castle= [[True, True], [True, True]]   #[White[QueenSide, KingSide], Black[QueenSide, KingSide]]
+        
 
     #Maybe create a movelist / tracker and implement undo move feature            
     def pseudoMove(self, posA, posB): #Moves piece, but doesn't change the board
@@ -80,6 +79,16 @@ class Board:
 
         if self.board[posB].piece == PAWN:
             self.promotePawn(posB, QUEEN)   #When implementing with GUI probably move to Game.py
+        elif self.board[posB].piece == KING:
+            self.castle[(self.board[posB].colour + 1) // 2][0] = False #Should probably make this more readable
+            self.castle[(self.board[posB].colour + 1) // 2][1] = False
+        elif self.board[posB].piece == ROOK:
+            color = self.board[posB].colour
+            if posA == 21 and color == BLACK or posA == 91 and color == WHITE:  #It's almost 2 AM so hardcode time wooh
+                self.castle[(self.board[posB].colour + 1) // 2][0] = False
+            elif posA == 28 and color == BLACK or posA == 98 and color == WHITE:
+                self.castle[(self.board[posB].colour + 1) // 2][1] = False
+            self.castle[(self.board[posB].colour + 1) // 2][posA % 10 < 5] = False
 
         #Check if there has been a check
         possibleMoves = self.getMoves(posB)
@@ -88,6 +97,27 @@ class Board:
                 self.check = self.board[move].colour  
                 self.checkPosition = posB
                 print("Check")
+
+    def movePieceAdvanced(self, posA, posB):
+        self.movePiece(posA, posB)
+
+    def doCastle(self, kingPosition, castlePosition):
+        #Might as well hard code this a bit
+        castlePosition *= -1
+        castleClrIndex = (self.board[kingPosition].colour + 1) // 2
+        if castlePosition % 10 < 5:
+            #kingPosition = castlePosition + 2
+            rookPosition = castlePosition - 2       
+            self.movePiece(kingPosition, castlePosition)
+            self.movePiece(rookPosition, castlePosition + 1)
+        else:
+            #kingPosition = castlePosition - 2
+            rookPosition = castlePosition + 1
+            self.movePiece(kingPosition, castlePosition)
+            self.movePiece(rookPosition, castlePosition - 1)
+        
+        self.castle[castleClrIndex][0] = False
+        self.castle[castleClrIndex][1] = False
 
     def promotePawn(self, position, promotionPiece):
         pawn = self.board[position]
@@ -218,11 +248,51 @@ class Board:
             if valid == True:
                 possibleMoves.append(trg)
             
-        #Lol let's just brute force this
-        #NOTE: find some fix for king walking into a check
+        #Put castling rights into a seperate function
         
         return possibleMoves
     
+    def getCastleMove(self, position): #Remember can't castle when in check
+        color = self.board[position].colour
+        castle_index = (color + 1) // 2    #0 or 1 depending on white or black
+        #castleRights = self.castle[castle_index]
+        possibleMoves = []
+
+        if color == BLACK:
+            rowIndex = 25
+        else:
+            rowIndex = 95
+
+        if (self.castle[castle_index][0] == True):   #Queenside
+            pass
+            #Check if no piece between king and rook
+            #Then check each space and see if check would occur if King moved there
+            #Or if king can even move there
+            tracker = rowIndex
+            moves = self.getKingMoves(rowIndex) #Theres probably a more efficient way to do this
+            if (tracker - 1) in moves:
+                tracker -= 1
+                self.pseudoMove(rowIndex, tracker)   #Change pseudo move when refactoring
+                moves = self.getKingMoves(tracker) #Maybe edit kingmoves to take in colour as argument so i don't need to move piece?
+                self.pseudoMove(tracker, rowIndex)  #Undo move
+                
+                if (tracker - 1) in moves and self.board[tracker - 2].colour == 0:  #Can probably make recursive helper
+                    
+                    possibleMoves.append(-(rowIndex - 2))   #Use negative number to identify castle move
+                    #possibleMoves.append(-(rowIndex - 4)) #Can also click on rook
+
+        if (self.castle[castle_index][1] == True):   #Kingside
+            tracker = rowIndex
+            moves = self.getKingMoves(rowIndex) #Theres probably a more efficient way to do this
+            if (tracker + 1) in moves:
+                tracker += 1
+                self.pseudoMove(rowIndex, tracker)   #Change pseudo move when refactoring
+                moves = self.getKingMoves(tracker) #Maybe edit kingmoves to take in colour as argument so i don't need to move piece?
+                self.pseudoMove(tracker, rowIndex)  #Undo move
+                if (tracker + 1) in moves:  #Can probably make recursive helper
+                    possibleMoves.append(-(rowIndex + 2))
+        
+        return possibleMoves
     #General get move
     def getMoves(self, position):
         
@@ -306,6 +376,8 @@ class Board:
 
         if self.check != color: #If not in check getMoves normally
             possibleMoves = self.getLegalMove(position, self.getMoves(position))
+            if piece == KING:
+                possibleMoves.extend(self.getCastleMove(position))
             return possibleMoves
         else:
             if piece == KING:

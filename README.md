@@ -12,7 +12,7 @@ Base Game:
 - Integrating with GUI ✓
 - Checkmate/Win conditions ✓
 - Advanced Rules
-    - Castling
+    - Castling ✓
     - Promotion (50%)
     - En Possant
     - Stalemate

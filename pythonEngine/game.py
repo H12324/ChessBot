@@ -55,6 +55,7 @@ def highlightMoves(possibleMoves, boardPos): #Function here to improve user qual
     screen.blit(highlight, boardToScreenPos(SQUARE_SIZE, boardPos))
     
     for move in possibleMoves:
+        move = abs(move)
         highlight.fill((0, 0, 0, 0))  #Clear surface so don't blit multiple times, removing this causes visual bug where both highlights can occur simultaneously for sliding pieces
         #Use a different highlight for if space empty, vs if enemy piece exists
         if cBoard.board[move].colour == 0:      
@@ -82,7 +83,10 @@ def boardToScreenPos(SQUARE_SIZE, boardPos):
     return (SQUARE_SIZE*(int(str(boardPos)[1]) - 1) , SQUARE_SIZE * ((boardPos - 21) // 10)) #Weird implementation but it works 
 
 def doMove(boardPos, move):
-    cBoard.movePiece(boardPos, move)
+    if move > 0:
+        cBoard.movePiece(boardPos, move)
+    else:
+        cBoard.doCastle(boardPos, move)   #Represent castle as a negative move
     updateScreen(cBoard.board)
     if cBoard.check != 0:
         checkmate = cBoard.isCheckMate(cBoard.check)
@@ -107,8 +111,8 @@ highlight = pg.Surface((SQUARE_SIZE, SQUARE_SIZE), pg.SRCALPHA)
 #pg.draw.circle(highlight, (0, 0, 0, 128), (int(SQUARE_SIZE/2), int(SQUARE_SIZE/2)),int(SQUARE_SIZE/2), 2)
 pg.display.set_icon(images[1])
 
-cBoard = chess.Board() 
-
+cBoard = chess.Board("r3kbnr/pb2pppp/nq1p4/1pp5/1P3PP1/NQP4N/PB1PP1BP/R3K2R w KQkq - 0 10")  #FEN to test castling, note still need to read full fen string
+#cBoard = chess.Board()
 updateScreen(cBoard.board)  
 
 pg.display.flip() #Updates display, i think 
@@ -154,6 +158,10 @@ def main():  #I structured this weirdly, maybe fix later
                                     #clickedValid = False
                                 elif secondPos in possibleMoves:
                                     doMove(boardPos, secondPos)
+                                    currentTurn *= -1
+                                    clickedValid = False
+                                elif (-secondPos) in possibleMoves:
+                                    doMove(boardPos, -secondPos)
                                     currentTurn *= -1
                                     clickedValid = False
                                 else:
