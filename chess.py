@@ -58,7 +58,7 @@ class Board:
         self.checkPosition = 0 #Position of piece in check
         self.king = [25, 95] #Location of the king, hard coded for now, fix after fixing
         self.castle= [[True, True], [True, True]]   #[White[QueenSide, KingSide], Black[QueenSide, KingSide]]
-        self.enPassant = False
+        self.promotionPiece = QUEEN #Variable for if I want GUI implementation
 
     #Maybe create a movelist / tracker and implement undo move feature            
     def pseudoMove(self, posA, posB): #Moves piece, but doesn't change the board

@@ -1,18 +1,25 @@
 import pygame as pg
 from pygame import gfxdraw
+import os
 
-import random
 
 import chess
+import bot
 #from chess import Board as board
+
+fileLoc = os.path.dirname(os.path.abspath(__file__))
+
 
 def loadImages(SQUARE_SIZE):
     #pieces = ["wB", "bB", "wN", "bN", "wR", "bR", "wP", "bP", "wK", "bK", "wQ", "bQ"]
     pieces = ["bP", "bN", "bR", "bB", "bQ", "bK", "wP", "wN", "wR", "wB", "wQ", "wK"]
     images = []
+    
     for piece in pieces:
         #images.append(pg.image.load('assets/' + piece + '.png'))   #NOTE: figure out how to make python paths work and avoid working directory weirdness
-        images.append(pg.image.load('pythonEngine/assets/' + piece + '.png'))
+        #images.append(pg.image.load('pythonEngine/assets/' + piece + '.png'))
+        images.append(pg.image.load(fileLoc+ '\\assets\\' + piece + '.png'))
+        
     for piece in range(len(images)):
         #images[piece] = pg.transform.scale(images[piece], (SQUARE_SIZE, SQUARE_SIZE))
         images[piece] = pg.transform.smoothscale(images[piece], (SQUARE_SIZE,SQUARE_SIZE))

@@ -13,8 +13,8 @@ Base Game:
 - Checkmate/Win conditions ✓
 - Advanced Rules
     - Castling ✓
-    - Promotion (50%)
-    - En Possant
+    - Promotion ✓ *Note: only promote to queen, might change later if I feel less lazy
+    - En Possant ✓
     - Stalemate
 
 AI Development:
@@ -22,8 +22,3 @@ AI Development:
 - Basic Minimax
 - Alpha-Beta Pruning
 - Further optimizations
-## C++:
-- Board Representation (Bitboard) ✓
-- Move Generation
-- Advanced Moves
-- Win Conditions
